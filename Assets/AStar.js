@@ -260,14 +260,14 @@ function GetNextMove(start_pos : int[], end_pos : int[], connections, bounds : i
 // Unity Functions
 //-------------------------------------
 
-var bounds;
+/*var bounds;
 var start;
 var end;
 var connections;
-var done = false;
+var done = false;*/
 
 function Start () {
-	connections = [
+	/*connections = [
 		[[3, 0], [3, 1]],
 		[[3, 1], [2, 1]],
 		[[2, 1], [1, 1]],
@@ -282,11 +282,11 @@ function Start () {
 
 	bounds = [0, 4, 0, 4];
 	start = [3, 0];
-	end = [3, 4];
+	end = [3, 4];*/
 }
 
 function Update () {
-	if(done) {
+	/*if(done) {
 		return;
 	}
 
@@ -315,6 +315,6 @@ function Update () {
 	else {
 		Debug.Log("Unknown move:" + move.ToString());
 		done = true;
-	}
+	}*/
 }
 
