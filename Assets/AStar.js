@@ -1,60 +1,79 @@
-//------------------------------------
-// Globals
-//------------------------------------
+#pragma strict
 
-var pathcache = null;
-var NOPATH = -1;
-var UP = 0;
-var LEFT = 1;
-var DOWN = 2;
-var RIGHT = 3;
+import System.Collections.Generic;
 
 //-------------------------------------
 // Objects
 //-------------------------------------
 
-var PathCache = function(connections, bounds, version) {
-	this.bounds = bounds;
-	this.connections = connections;
-	this.version = version;
-	this.destinations = new Array();
 
-	this.HasPathTo = function(destination) {
-		return this.destinations.indexOf(destination) != -1;
+class PathCache {
+	// [xmin, xmax, ymin, ymax]
+	public var bounds : Array;
+
+	// [[this, neighbor, neighbor, neighbor], [this2, neighbor]]
+	// each element is [x, y]
+	public var connections;
+
+	// keep track of the "version" of the level 
+	// that this PathCache is for
+	public var level_version : int;
+
+	// key is destination [x, y]
+	public var paths : Dictionary.<int[], List.<int[]> >;
+
+	public function PathCache(bounds : Array, connections, version : int) {
+		this.bounds = bounds;
+		this.connections = connections;
+		this.level_version = version;
 	}
 
-	this.SourceInPath = function(source, destination) {
+	public function HasPathTo(destination : int[]) : boolean {
+		return this.paths.ContainsKey(destination) != -1;
+	}
+
+	public function SourceInPath(source : int[], destination : int[]) : boolean {
 		if(this.HasPathTo(destination)) {
-			path = this.PathTo(destination);
-			return path.indexOf(source) != -1;
+			var path : List.<int[]> = this.PathTo(destination);
+			return path.IndexOf(source) != -1;
 		}
 		else {
 			return false;
 		}
 	}
 
-	this.NextPosInPath = function(source, destination) {
+	public function NextPosInPath(source : int[], destination : int[]) : Array {
 		if(source == destination) {
 			return null;
 		}
 		else if(this.SourceInPath(source, destination)) {
-			path = this.PathTo(destination);
-			return path[path.indexOf(source)+1];
+			var path : List.<int[]> = this.PathTo(destination);
+			return path[path.IndexOf(source) + 1];
 		}
 		else {
 			return null;
 		}
 	}
 
-	this.AddPathTo = function(destination, path) {
-		this.destinations[destination] = path;
+	public function AddPathTo(destination : int[], path : List.<int[]>) {
+		this.paths[destination] = path;
 	}
 
-	this.PathTo = function(destination) {
-		return this.destinations[destination];
+	public function PathTo(destination : int[]) : List.<int[]> {
+		return this.paths[destination];
 	}
 }
 
+//------------------------------------
+// Globals
+//------------------------------------
+
+var pathcache : PathCache;
+var NOPATH = -1;
+var UP = 0;
+var LEFT = 1;
+var DOWN = 2;
+var RIGHT = 3;
 
 //-------------------------------------
 // Unity Functions
@@ -74,55 +93,35 @@ function Update () {
 // My Functions
 //-------------------------------------
 
-// Array Remove - By John Resig (MIT Licensed)
-Array.prototype.remove = function(from, to) {
-	var rest = this.slice((to || from) + 1 || this.length);
-	this.length = from < 0 ? this.length + from : from;
-	return this.push.apply(this, rest);
-};
-
-function Distance(A, B) {
+function Distance(A : int[], B : int[]) {
 	// manhattan
-	return Math.abs(A[0] - B[0]) + Math.abs(A[1] - B[1]);
+	return Mathf.Abs(A[0] - B[0]) + Mathf.Abs(A[1] - B[1]);
 }
 
-function Neighbors(p) {
+function Neighbors(p : int[]) {
 	return [
 		[p[0]+1, p[1]  ],
 		[p[0]  , p[1]+1],
 		[p[0]-1, p[1]  ],
-		[p[0]  , p[1]-1],
+		[p[0]  , p[1]-1]
 	];
 }
 
-function GetPath(start_pos, end_pos) {
-	var openset = new Array();
-	var closedset = new Array();
-	var costs_from_start = new Array();
-	var estimated_path_costs = new Array();
-	var final_path_links = new Array();
-
-	costs_from_start[start] = 0;
-	estimated_path_costs[start] = Distance(start, destination);
-
-	openset.push(start);
-
-	while(openset.length > 0) {
-	}
-
-	return new Array();
+function GetPath(start_pos, end_pos) : List.<int[]> {
+	return new List.<int[]>();
 }
 
-function GetNextPos(start_pos, end_pos, connections, bounds, version)
+function GetNextPos(start_pos : int[], end_pos : int[], connections : Array, bounds : Array, version : int)
 {
+	var pathcache = new PathCache(connections, bounds, version);
 	// pathcache is global (see top of file)
-	if(pathcache == null || pathcache.version < version) {
+	if(pathcache == null || pathcache.level_version < version) {
 		// pathcache.version < version means that somebody mined a block
 		// and now all of our cached paths are invalidated 
-		pathcache = new PathCache(connectiosn, bounds, version);
+		pathcache = new PathCache(connections, bounds, version);
 	}
 
-	var nextpos = null;
+	var next_pos : int[] = null;
 
 	if(start_pos == end_pos) {
 		// WELL DUH
@@ -130,34 +129,36 @@ function GetNextPos(start_pos, end_pos, connections, bounds, version)
 	}
 	else if(pathcache.SourceInPath(start_pos, end_pos)) {
 		// we have a cached path that has both start_pos and end_pos in it
-		nextpos = pathcache.NextPosInPath(start_pos, end_pos);
+		next_pos = pathcache.NextPosInPath(start_pos, end_pos);
 	}
 	else
 	{
 		// compute path and add to pathcache
-		path = GetPath(start_pos, end_pos);
+		var path : List.<int[]> = GetPath(start_pos, end_pos);
 		pathcache.AddPathTo(end_pos, path);
-		nextpos = pathcache.NextPosInPath(start_pos, end_pos);
+		next_pos = pathcache.NextPosInPath(start_pos, end_pos);
 	}
 
-	if(nextpos == null) {
+	if(next_pos == null) {
 		return NOPATH;
 	}
-	else if(nextpos[1] == start_pos[1]-1) {
+	else if(next_pos[1] == start_pos[1] - 1) {
 		return UP;
 	}
-	else if(nextpos[0] == start_pos[0]-1) {
+	else if(next_pos[0] == start_pos[0]-1) {
 		return LEFT;
 	}
-	else if(nextpos[1] == start_pos[1]+1) {
+	else if(next_pos[1] == start_pos[1]+1) {
 		return DOWN;
 	}
-	else if(nextpos[0] == start_pos[0]+1) {
+	else if(next_pos[0] == start_pos[0]+1) {
 		return RIGHT;
 	}
 	else {
 		// we got a path state that is not directly N/S/E/W of start_pos (should never happen)
-		Debug.Log("WOAH WOAH WOAH!!!! Got a bad next pos:" + String(start_pos) + " -> " + String(nextpos));
+		Debug.Log("WOAH WOAH WOAH!!!! Got a bad next pos: [" + 
+			start_pos[0].ToString() + ", " + start_pos[1].ToString() + 
+			"] -> [" + next_pos[0].ToString() + ", " + next_pos[1].ToString() + "]");
 		return NOPATH;
 	}
 }
