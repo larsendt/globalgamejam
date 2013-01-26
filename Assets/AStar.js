@@ -44,9 +44,9 @@ class PathCache {
 	}
 
 	public function HasPathTo(destination : int[]) : boolean {
-		Log.Debug("HasPathTo");
-		Log.Debug(destination);
-		Log.Debug(this.paths);
+		Debug.Log("HasPathTo");
+		Debug.Log(destination);
+		Debug.Log(this.paths);
 		var retval = this.paths.ContainsKey(PosToStr(destination));
 		return retval;
 	}

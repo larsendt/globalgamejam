@@ -14,13 +14,33 @@ private var dirt_layermask = 1<<10;
 private var time_since_changemove : float;
 private var current_move : int;
 
+public var pathfinding : GameObject;
+private var pathfinding_script : AStar;
+
+public var ground_object : GameObject;
+private var ground_control_script : GroundControl;
+
 function Start () {
 	current_move = 2;
+	pathfinding_script = pathfinding.transform.GetComponent(AStar);
+	ground_control_script = ground_object.transform.GetComponent(GroundControl);
+
 }
 
 function Update () {
-	if (time_since_changemove > 2) {
+	if (time_since_changemove > 1) {
 		current_move = Mathf.Floor(Random.Range(1, 4));
+		var current_pos = [Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y)];
+		var destination = [5, 0];
+		Debug.Log(destination);
+		for (i in destination) {
+			Debug.Log(i);
+		}
+		var conn = ground_control_script.connections;
+		var bounds = [0, 10, 0, 50];
+		var vers = ground_control_script.version;
+		var current_move = pathfinding_script.GetNextMove(current_pos, destination, conn, bounds, vers);
+		Debug.Log(current_move);
 		time_since_changemove = 0;
 	}
 	else {
@@ -68,7 +88,7 @@ function DigDown() {
 		    // Debug.Log("hit dirt");
 		// }
 	}
-	Debug.DrawRay(transform.position, -Vector3.up);
+	// Debug.DrawRay(transform.position, -Vector3.up);
 }
 
 function DigLeft() {
