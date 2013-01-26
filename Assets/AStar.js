@@ -2,10 +2,13 @@
 
 import System.Collections.Generic;
 
+function PosStr(pos : int[]) : String {
+	return "[" + pos[0].ToString() + ", " + pos[1].ToString() + "]";
+}
+
 //-------------------------------------
 // Objects
 //-------------------------------------
-
 
 class PathCache {
 	// [xmin, xmax, ymin, ymax]
@@ -26,10 +29,12 @@ class PathCache {
 		this.bounds = bounds;
 		this.connections = connections;
 		this.level_version = version;
+		this.paths = new Dictionary.<int[], List.<int[]> >();
 	}
 
 	public function HasPathTo(destination : int[]) : boolean {
-		return this.paths.ContainsKey(destination) != -1;
+		var retval = this.paths.ContainsKey(destination);
+		return retval;
 	}
 
 	public function SourceInPath(source : int[], destination : int[]) : boolean {
@@ -44,14 +49,16 @@ class PathCache {
 
 	public function NextPosInPath(source : int[], destination : int[]) : Array {
 		if(source == destination) {
-			return null;
+			Debug.Log("NextPosInPath: Source == Destination");
+			return [0];
 		}
 		else if(this.SourceInPath(source, destination)) {
 			var path : List.<int[]> = this.PathTo(destination);
 			return path[path.IndexOf(source) + 1];
 		}
 		else {
-			return null;
+			Debug.Log("NextPosInPath: source not in path or no path to destination");
+			return [0];
 		}
 	}
 
@@ -76,38 +83,41 @@ var DOWN = 2;
 var RIGHT = 3;
 
 //-------------------------------------
-// Unity Functions
-//-------------------------------------
-
-
-function Start () {
-
-}
-
-function Update () {
-	Debug.Log("Blah");
-}
-
-
-//-------------------------------------
 // My Functions
 //-------------------------------------
+
+function IsValidPos(pos : int []) : boolean {
+	return pos.Length == 2;
+}
 
 function Distance(A : int[], B : int[]) {
 	// manhattan
 	return Mathf.Abs(A[0] - B[0]) + Mathf.Abs(A[1] - B[1]);
 }
 
-function Neighbors(p : int[]) : List.<int[]> {
+function Neighbors(p : int[], bounds : int[]) : List.<int[]> {
 	var retval = new List.<int[]>();
-	retval.Add([p[0]+1, p[1]  ]);
-	retval.Add([p[0]-1, p[1]  ]);
-	retval.Add([p[0]  , p[1]+1]);
-	retval.Add([p[0]  , p[1]-1]);
+	if(p[0] < bounds[1]) {
+		retval.Add([p[0]+1, p[1]  ]);
+	}
+
+	if(p[0] > bounds[0]) {
+		retval.Add([p[0]-1, p[1]  ]);
+	}
+
+	if(p[1] < bounds[3]) {
+		retval.Add([p[0]  , p[1]+1]);
+	}
+
+	if(p[1] > bounds[2]) {
+		retval.Add([p[0]  , p[1]-1]);
+	}
 	return retval;	
 }
 
 function ReconstructPath(path_links : Dictionary.<int[], int[]>, start_pos : int[], end_pos : int[]) : List.<int[]> {
+	//path_links[end_pos] = [1, 1];
+	//Debug.Log(path_links.Count);
 	var retval = new List.<int[]>();
 	var current = path_links[end_pos];
 
@@ -130,7 +140,7 @@ function ReconstructPath(path_links : Dictionary.<int[], int[]>, start_pos : int
 	return new List.<int[]>();
 }
 
-function GetPath(start_pos : int[], end_pos : int[]) : List.<int[]> {
+function GetPath(start_pos : int[], end_pos : int[], bounds : int[]) : List.<int[]> {
 	var openset = new List.<int[]>();
 	var closedset = new List.<int[]>();
 	var costs = new Dictionary.<int[], int>();
@@ -151,13 +161,16 @@ function GetPath(start_pos : int[], end_pos : int[]) : List.<int[]> {
 		}
 
 		if(current == end_pos) {
+			//for(var key : int[] in path_links.Keys) {
+			//	Debug.Log("KEY: " + PosStr(key) + " :: " + path_links.ContainsKey(key).ToString());
+			//}
 			return ReconstructPath(path_links, start_pos, end_pos);
 		}
 
 		openset.Remove(current);
 		closedset.Add(current);
 
-		for(neighbor in Neighbors(current)) {
+		for(neighbor in Neighbors(current, bounds)) {
 			if(closedset.Contains(neighbor)) {
 				continue;
 			}
@@ -180,7 +193,7 @@ function GetPath(start_pos : int[], end_pos : int[]) : List.<int[]> {
 	return new List.<int[]>();
 }
 
-function GetNextPos(start_pos : int[], end_pos : int[], connections : Array, bounds : Array, version : int) : int {
+function GetNextMove(start_pos : int[], end_pos : int[], connections : Array, bounds : int[], version : int) : int {
 	var pathcache = new PathCache(connections, bounds, version);
 	// pathcache is global (see top of file)
 	if(pathcache == null || pathcache.level_version < version) {
@@ -189,7 +202,7 @@ function GetNextPos(start_pos : int[], end_pos : int[], connections : Array, bou
 		pathcache = new PathCache(connections, bounds, version);
 	}
 
-	var next_pos : int[] = null;
+	var next_pos : int[] = [0];
 
 	if(start_pos == end_pos) {
 		// WELL DUH
@@ -202,12 +215,12 @@ function GetNextPos(start_pos : int[], end_pos : int[], connections : Array, bou
 	else
 	{
 		// compute path and add to pathcache
-		var path : List.<int[]> = GetPath(start_pos, end_pos);
+		var path : List.<int[]> = GetPath(start_pos, end_pos, bounds);
 		pathcache.AddPathTo(end_pos, path);
 		next_pos = pathcache.NextPosInPath(start_pos, end_pos);
 	}
 
-	if(next_pos == null) {
+	if(!IsValidPos(next_pos)) {
 		return NOPATH;
 	}
 	else if(next_pos[1] == start_pos[1] - 1) {
@@ -230,3 +243,66 @@ function GetNextPos(start_pos : int[], end_pos : int[], connections : Array, bou
 		return NOPATH;
 	}
 }
+
+//-------------------------------------
+// Unity Functions
+//-------------------------------------
+
+function Test(param : Dictionary.<int[], int[]>) {
+	for(var key : int[] in param.Keys) {
+		Debug.Log("KEY: " + PosStr(key));
+		Debug.Log("CONTAINS? " + param.ContainsKey(key).ToString());
+	}
+}
+
+function Start () {
+	var connections = [
+		[[3, 0], [3, 1]],
+		[[3, 1], [2, 1]],
+		[[2, 1], [1, 1]],
+		[[1, 1], [0, 1]],
+		[[0, 1], [0, 2]],
+		[[0, 2], [0, 3]],
+		[[0, 3], [1, 3]],
+		[[1, 3], [2, 3]],
+		[[2, 3], [3, 3]],
+		[[3, 3], [3, 4]]
+	];
+
+	var bounds = [0, 4, 0, 4];
+	var start = [3, 0];
+	var end = [3, 4];
+
+	var test = new Dictionary.<int[], int[]>();
+	test[start] = end;
+	test[end] = start;
+	Test(test);
+
+	while(true) {
+		var move = GetNextMove(start, end, connections, bounds, 0);
+		if(move == UP) {
+			Debug.Log("UP");
+		}
+		else if(move == DOWN) {
+			Debug.Log("DOWN");
+		}
+		else if(move == LEFT) {
+			Debug.Log("LEFT");
+		}
+		else if(move == RIGHT) {
+			Debug.Log("RIGHT");
+		}
+		else if(move == NOPATH) {
+			Debug.Log("NOPATH");
+			break;
+		}
+		else {
+			Debug.Log("Unknown move:" + move.ToString());
+			break;
+		}
+	}
+}
+
+function Update () {
+}
+
