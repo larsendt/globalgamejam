@@ -98,21 +98,89 @@ function Distance(A : int[], B : int[]) {
 	return Mathf.Abs(A[0] - B[0]) + Mathf.Abs(A[1] - B[1]);
 }
 
-function Neighbors(p : int[]) {
-	return [
-		[p[0]+1, p[1]  ],
-		[p[0]  , p[1]+1],
-		[p[0]-1, p[1]  ],
-		[p[0]  , p[1]-1]
-	];
+function Neighbors(p : int[]) : List.<int[]> {
+	var retval = new List.<int[]>();
+	retval.Add([p[0]+1, p[1]  ]);
+	retval.Add([p[0]-1, p[1]  ]);
+	retval.Add([p[0]  , p[1]+1]);
+	retval.Add([p[0]  , p[1]-1]);
+	return retval;	
 }
 
-function GetPath(start_pos, end_pos) : List.<int[]> {
+function ReconstructPath(path_links : Dictionary.<int[], int[]>, start_pos : int[], end_pos : int[]) : List.<int[]> {
+	var retval = new List.<int[]>();
+	var current = path_links[end_pos];
+
+	while(true) {
+		retval.Insert(0, current);
+		if(path_links.ContainsKey(current)) {
+			current = path_links[current];
+		}
+		else {
+			Debug.Log("Path was broken?!?!?!?!?");
+			return new List.<int[]>();
+		}
+
+		if(current == start_pos) {
+			return retval;
+		}
+	}
+
+	Debug.Log("Could not reconstruct path?!?!?!?");
 	return new List.<int[]>();
 }
 
-function GetNextPos(start_pos : int[], end_pos : int[], connections : Array, bounds : Array, version : int)
-{
+function GetPath(start_pos : int[], end_pos : int[]) : List.<int[]> {
+	var openset = new List.<int[]>();
+	var closedset = new List.<int[]>();
+	var costs = new Dictionary.<int[], int>();
+	var distances = new Dictionary.<int[], int>();
+	var path_links = new Dictionary.<int[], int[]>();
+
+	costs[start_pos] = 0;
+	distances[start_pos] = Distance(start_pos, end_pos);
+ 
+	openset.Add(start_pos);
+
+	while(openset.Count > 0) {
+		var current = openset[0];
+		for(item in openset) { 
+			if(distances[item] < distances[current]) {
+				current = item;
+			}
+		}
+
+		if(current == end_pos) {
+			return ReconstructPath(path_links, start_pos, end_pos);
+		}
+
+		openset.Remove(current);
+		closedset.Add(current);
+
+		for(neighbor in Neighbors(current)) {
+			if(closedset.Contains(neighbor)) {
+				continue;
+			}
+
+			var tentative_cost = costs[current] + Distance(current, neighbor);
+
+			if((!openset.Contains(neighbor)) || (tentative_cost < costs[neighbor])) {
+				path_links[neighbor] = current;
+				costs[neighbor] = tentative_cost;
+				distances[neighbor] = costs[neighbor] + Distance(neighbor, end_pos);
+
+				if(!openset.Contains(neighbor)) {
+					openset.Add(neighbor);
+				}
+			}
+		}
+
+	}
+
+	return new List.<int[]>();
+}
+
+function GetNextPos(start_pos : int[], end_pos : int[], connections : Array, bounds : Array, version : int) : int {
 	var pathcache = new PathCache(connections, bounds, version);
 	// pathcache is global (see top of file)
 	if(pathcache == null || pathcache.level_version < version) {
