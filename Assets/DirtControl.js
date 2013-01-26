@@ -1,10 +1,8 @@
 #pragma strict
 
-public var is_on : boolean;
+private var is_on : boolean;
 
 public var health : float;
-
-public var resistance : int;
 
 function Start () {
 	is_on = true;
