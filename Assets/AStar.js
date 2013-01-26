@@ -1,5 +1,3 @@
-#pragma strict
-
 import System.Collections.Generic;
 
 function PosToStr(pos : int[]) : String {
@@ -31,7 +29,7 @@ class PathCache {
 	// key is destination [x, y]
 	public var paths : Dictionary.<String, List.<String> >;
 
-	public function PathCache(bounds : Array, connections, version : int) {
+	public function PathCache(bounds : int[], connections, version : int) {
 		this.bounds = bounds;
 		this.connections = connections;
 		this.level_version = version;
@@ -47,28 +45,20 @@ class PathCache {
 		if(this.HasPathTo(destination)) {
 			var path : List.<String> = this.PathTo(destination);
 
-			for(item in path) {
-				Debug.Log("Item: " + item);
-			}
-
 			if(path.Contains(PosToStr(source))) {
-				Debug.Log("SourceInPath: source was in path");
 				return true;
 			}
 			else {
-				Debug.Log("SourceInPath: source was NOT in path " + PosToStr(source));
 				return false;
 			}
 		}
 		else {
-			Debug.Log("SourceInPath: no path to destination " + PosToStr(destination));
 			return false;
 		}
 	}
 
 	public function NextPosInPath(source : int[], destination : int[]) : int[] {
 		if(source == destination) {
-			Debug.Log("NextPosInPath: Source == Destination");
 			return [0];
 		}
 		else if(this.SourceInPath(source, destination)) {
@@ -76,7 +66,6 @@ class PathCache {
 			return StrToPos(path[path.IndexOf(PosToStr(source)) + 1]);
 		}
 		else {
-			Debug.Log("NextPosInPath: source not in path or no path to destination");
 			return [0];
 		}
 	}
@@ -124,31 +113,23 @@ function Distance(A : int[], B : int[]) {
 	return Mathf.Abs(A[0] - B[0]) + Mathf.Abs(A[1] - B[1]);
 }
 
-function Neighbors(p : int[], bounds : int[]) : List.<int[]> {
+function Neighbors(p : int[], connections) : List.<int[]> {
 	var retval = new List.<int[]>();
-	if(p[0] < bounds[1]) {
-		retval.Add([p[0]+1, p[1]  ]);
+	for(conn_list in connections) {
+		if(conn_list[0] == p) {
+			for(var i = 1; i < conn_list.Length; i++) {
+				retval.Add(conn_list[i]);
+			}
+		}
 	}
-
-	if(p[0] > bounds[0]) {
-		retval.Add([p[0]-1, p[1]  ]);
-	}
-
-	if(p[1] < bounds[3]) {
-		retval.Add([p[0]  , p[1]+1]);
-	}
-
-	if(p[1] > bounds[2]) {
-		retval.Add([p[0]  , p[1]-1]);
-	}
-	return retval;	
+	return retval;
 }
 
 function ReconstructPath(path_links : Dictionary.<String, int[]>, start_pos : int[], end_pos : int[]) : List.<String> {
 	var retval = new List.<String>();
-	var current : int[] = path_links[PosToStr(end_pos)];
+	var current : int[] = end_pos;
 
-	while(true) {
+	while(current != start_pos) {
 		retval.Insert(0, PosToStr(current));
 		if(path_links.ContainsKey(PosToStr(current))) {
 			current = path_links[PosToStr(current)];
@@ -157,17 +138,13 @@ function ReconstructPath(path_links : Dictionary.<String, int[]>, start_pos : in
 			Debug.Log("Path was broken?!?!?!?!?");
 			return new List.<String>();
 		}
-
-		if(current == start_pos) {
-			return retval;
-		}
 	}
 
-	Debug.Log("Could not reconstruct path?!?!?!?");
-	return new List.<String>();
+	retval.Insert(0, PosToStr(start_pos));
+	return retval;
 }
 
-function GetPath(start_pos : int[], end_pos : int[], bounds : int[]) : List.<String> {
+function GetPath(start_pos : int[], end_pos : int[], bounds : int[], connections) : List.<String> {
 	var openset = new List.<String>();
 	var closedset = new List.<String>();
 	var costs = new Dictionary.<String, int>();
@@ -181,7 +158,6 @@ function GetPath(start_pos : int[], end_pos : int[], bounds : int[]) : List.<Str
 
 	while(openset.Count > 0) {
 		var current = StrToPos(openset[0]);
-		Debug.Log("current: " + PosToStr(current));
 		for(var item : String in openset) { 
 			if(distances[item] < distances[PosToStr(current)]) {
 				current = StrToPos(item);
@@ -195,7 +171,7 @@ function GetPath(start_pos : int[], end_pos : int[], bounds : int[]) : List.<Str
 		openset.Remove(PosToStr(current));
 		closedset.Add(PosToStr(current));
 
-		for(neighbor in Neighbors(current, bounds)) {
+		for(neighbor in Neighbors(current, connections)) {
 			if(closedset.Contains(PosToStr(neighbor))) {
 				continue;
 			}
@@ -218,19 +194,24 @@ function GetPath(start_pos : int[], end_pos : int[], bounds : int[]) : List.<Str
 	return new List.<String>();
 }
 
-function GetNextMove(start_pos : int[], end_pos : int[], connections : Array, bounds : int[], version : int) : int {
-	var pathcache = new PathCache(connections, bounds, version);
+function GetNextMove(start_pos : int[], end_pos : int[], connections, bounds : int[], version : int) : int {
+	// caching is temporarily disabled -- need to fix
+	var pathcache = new PathCache(bounds, connections, version);
 	// pathcache is global (see top of file)
-	if(pathcache == null || pathcache.level_version < version) {
+	if(pathcache == null) {
+		pathcache = new PathCache(bounds, connections, version);
+	}
+	else if(pathcache.level_version < version) {
 		// pathcache.version < version means that somebody mined a block
 		// and now all of our cached paths are invalidated 
-		pathcache = new PathCache(connections, bounds, version);
+		pathcache = new PathCache(bounds, connections, version);
 	}
 
 	var next_pos : int[] = [0];
 
 	if(start_pos == end_pos) {
 		// WELL DUH
+		Debug.Log("Start == End");
 		return NOPATH;
 	}
 	else if(pathcache.SourceInPath(start_pos, end_pos)) {
@@ -240,7 +221,7 @@ function GetNextMove(start_pos : int[], end_pos : int[], connections : Array, bo
 	else
 	{
 		// compute path and add to pathcache
-		var path : List.<String> = GetPath(start_pos, end_pos, bounds);
+		var path : List.<String> = GetPath(start_pos, end_pos, bounds, connections);
 		pathcache.AddPathTo(end_pos, path);
 		next_pos = pathcache.NextPosInPath(start_pos, end_pos);
 	}
@@ -273,8 +254,14 @@ function GetNextMove(start_pos : int[], end_pos : int[], connections : Array, bo
 // Unity Functions
 //-------------------------------------
 
+/*var bounds;
+var start;
+var end;
+var connections;
+var done = false;*/
+
 function Start () {
-	var connections = [
+	/*connections = [
 		[[3, 0], [3, 1]],
 		[[3, 1], [2, 1]],
 		[[2, 1], [1, 1]],
@@ -287,35 +274,41 @@ function Start () {
 		[[3, 3], [3, 4]]
 	];
 
-	var bounds = [0, 4, 0, 4];
-	var start = [3, 0];
-	var end = [3, 4];
-
-	while(true) {
-		var move = GetNextMove(start, end, connections, bounds, 0);
-		if(move == UP) {
-			Debug.Log("UP");
-		}
-		else if(move == DOWN) {
-			Debug.Log("DOWN");
-		}
-		else if(move == LEFT) {
-			Debug.Log("LEFT");
-		}
-		else if(move == RIGHT) {
-			Debug.Log("RIGHT");
-		}
-		else if(move == NOPATH) {
-			Debug.Log("NOPATH");
-			break;
-		}
-		else {
-			Debug.Log("Unknown move:" + move.ToString());
-			break;
-		}
-	}
+	bounds = [0, 4, 0, 4];
+	start = [3, 0];
+	end = [3, 4];	*/
 }
 
 function Update () {
+	/*if(done) {
+		return;
+	}
+
+	var move = GetNextMove(start, end, connections, bounds, 0);
+	Debug.Log(PosToStr(start) + " -> " + PosToStr(end));
+	if(move == UP) {
+		Debug.Log("UP");
+		start[1] -= 1;
+	}
+	else if(move == DOWN) {
+		Debug.Log("DOWN");
+		start[1] += 1;
+	}
+	else if(move == LEFT) {
+		Debug.Log("LEFT");
+		start[0] -= 1;
+	}
+	else if(move == RIGHT) {
+		Debug.Log("RIGHT");
+		start[0] += 1;
+	}
+	else if(move == NOPATH) {
+		Debug.Log("NOPATH");
+		done = true;
+	}
+	else {
+		Debug.Log("Unknown move:" + move.ToString());
+		done = true;
+	}*/
 }
 
