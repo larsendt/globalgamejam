@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: 70e91c79cdc07e8459954e386c71a0c8
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - dirt_object: {fileID: 100000, guid: ae8b4487b2bf97242a570c27797f205a, type: 2}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
