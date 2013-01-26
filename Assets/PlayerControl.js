@@ -49,35 +49,23 @@ function Strike() {
 function DigDown() {
 	var hit : RaycastHit;
     if (Physics.Raycast (transform.position, -Vector3.up, hit, 0.5)) {
-        // var distanceToGround = hit.distance;
-        // Debug.Log(hit.collider);
-	    
 	    var dirt_control_script : DirtControl = hit.collider.gameObject.GetComponent(DirtControl);
-	    // Debug.Log(dirt_control_script.health);
 	    dirt_control_script.health -= Time.deltaTime;
 	}
 }
 
 function DigLeft() {
 	var hit : RaycastHit;
-    if (Physics.Raycast (transform.position, -Vector3.right, hit, 0.5)) {
-        // var distanceToGround = hit.distance;
-        // Debug.Log(hit.collider);
-	    
+    if (Physics.Raycast (transform.position, -Vector3.right, hit, 0.5)) {    
 	    var dirt_control_script : DirtControl = hit.collider.gameObject.GetComponent(DirtControl);
-	    // Debug.Log(dirt_control_script.health);
 	    dirt_control_script.health -= Time.deltaTime;
 	}
 }
 
 function DigRight() {
 	var hit : RaycastHit;
-    if (Physics.Raycast (transform.position, Vector3.right, hit, 0.5)) {
-        // var distanceToGround = hit.distance;
-        // Debug.Log(hit.collider);
-	    
+    if (Physics.Raycast (transform.position, Vector3.right, hit, 0.5)) {	    
 	    var dirt_control_script : DirtControl = hit.collider.gameObject.GetComponent(DirtControl);
-	    // Debug.Log(dirt_control_script.health);
 	    dirt_control_script.health -= Time.deltaTime;
 	}
 }

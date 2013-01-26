@@ -6,6 +6,7 @@ public var depth : int;
 public var dirt_object : GameObject;
 public var dirt_golem_object : GameObject;
 public var indestructible_block_object : GameObject;
+public var dwarf_spawn_object : GameObject;
 
 public var version : int;
 public var blocks;
