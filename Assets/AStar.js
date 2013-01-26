@@ -44,6 +44,9 @@ class PathCache {
 	}
 
 	public function HasPathTo(destination : int[]) : boolean {
+		Log.Debug("HasPathTo");
+		Log.Debug(destination);
+		Log.Debug(this.paths);
 		var retval = this.paths.ContainsKey(PosToStr(destination));
 		return retval;
 	}
@@ -260,14 +263,14 @@ function GetNextMove(start_pos : int[], end_pos : int[], connections, bounds : i
 // Unity Functions
 //-------------------------------------
 
-/*var bounds;
+var bounds;
 var start;
 var end;
 var connections;
-var done = false;*/
+var done = false;
 
 function Start () {
-	/*connections = [
+	connections = [
 		[[3, 0], [3, 1]],
 		[[3, 1], [2, 1]],
 		[[2, 1], [1, 1]],
@@ -280,9 +283,9 @@ function Start () {
 		[[3, 3], [3, 4]]
 	];
 
-	bounds = [0, 4, 0, 4];
+	bounds = [0, 10, -2, 50];
 	start = [3, 0];
-	end = [3, 4];*/
+	end = [3, 4];
 }
 
 function Update () {
