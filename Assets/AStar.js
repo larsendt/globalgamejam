@@ -2,8 +2,14 @@
 
 import System.Collections.Generic;
 
-function PosStr(pos : int[]) : String {
-	return "[" + pos[0].ToString() + ", " + pos[1].ToString() + "]";
+function PosToStr(pos : int[]) : String {
+	return pos[0].ToString() + "," + pos[1].ToString();
+}
+
+// expects "x,y"
+function StrToPos(str : String) : int[] {
+	var numbers : String[] = str.Split(","[0]);
+	return [parseInt(numbers[0]), parseInt(numbers[1])];
 }
 
 //-------------------------------------
@@ -23,38 +29,51 @@ class PathCache {
 	public var level_version : int;
 
 	// key is destination [x, y]
-	public var paths : Dictionary.<int[], List.<int[]> >;
+	public var paths : Dictionary.<String, List.<String> >;
 
 	public function PathCache(bounds : Array, connections, version : int) {
 		this.bounds = bounds;
 		this.connections = connections;
 		this.level_version = version;
-		this.paths = new Dictionary.<int[], List.<int[]> >();
+		this.paths = new Dictionary.<String, List.<String> >();
 	}
 
 	public function HasPathTo(destination : int[]) : boolean {
-		var retval = this.paths.ContainsKey(destination);
+		var retval = this.paths.ContainsKey(PosToStr(destination));
 		return retval;
 	}
 
 	public function SourceInPath(source : int[], destination : int[]) : boolean {
 		if(this.HasPathTo(destination)) {
-			var path : List.<int[]> = this.PathTo(destination);
-			return path.IndexOf(source) != -1;
+			var path : List.<String> = this.PathTo(destination);
+
+			for(item in path) {
+				Debug.Log("Item: " + item);
+			}
+
+			if(path.Contains(PosToStr(source))) {
+				Debug.Log("SourceInPath: source was in path");
+				return true;
+			}
+			else {
+				Debug.Log("SourceInPath: source was NOT in path " + PosToStr(source));
+				return false;
+			}
 		}
 		else {
+			Debug.Log("SourceInPath: no path to destination " + PosToStr(destination));
 			return false;
 		}
 	}
 
-	public function NextPosInPath(source : int[], destination : int[]) : Array {
+	public function NextPosInPath(source : int[], destination : int[]) : int[] {
 		if(source == destination) {
 			Debug.Log("NextPosInPath: Source == Destination");
 			return [0];
 		}
 		else if(this.SourceInPath(source, destination)) {
-			var path : List.<int[]> = this.PathTo(destination);
-			return path[path.IndexOf(source) + 1];
+			var path : List.<String> = this.PathTo(destination);
+			return StrToPos(path[path.IndexOf(PosToStr(source)) + 1]);
 		}
 		else {
 			Debug.Log("NextPosInPath: source not in path or no path to destination");
@@ -62,12 +81,22 @@ class PathCache {
 		}
 	}
 
-	public function AddPathTo(destination : int[], path : List.<int[]>) {
-		this.paths[destination] = path;
+	public function AddPathTo(destination : int[], path : List.<String>) {
+		this.paths[PosToStr(destination)] = path;
 	}
 
-	public function PathTo(destination : int[]) : List.<int[]> {
-		return this.paths[destination];
+	public function PathTo(destination : int[]) : List.<String> {
+		return this.paths[PosToStr(destination)];
+	}
+
+	function PosToStr(pos : int[]) : String {
+		return pos[0].ToString() + "," + pos[1].ToString();
+	}
+
+	// expects "x,y"
+	function StrToPos(str : String) : int[] {
+		var numbers : String[] = str.Split(","[0]);
+		return [parseInt(numbers[0]), parseInt(numbers[1])];
 	}
 }
 
@@ -115,20 +144,18 @@ function Neighbors(p : int[], bounds : int[]) : List.<int[]> {
 	return retval;	
 }
 
-function ReconstructPath(path_links : Dictionary.<int[], int[]>, start_pos : int[], end_pos : int[]) : List.<int[]> {
-	//path_links[end_pos] = [1, 1];
-	//Debug.Log(path_links.Count);
-	var retval = new List.<int[]>();
-	var current = path_links[end_pos];
+function ReconstructPath(path_links : Dictionary.<String, int[]>, start_pos : int[], end_pos : int[]) : List.<String> {
+	var retval = new List.<String>();
+	var current : int[] = path_links[PosToStr(end_pos)];
 
 	while(true) {
-		retval.Insert(0, current);
-		if(path_links.ContainsKey(current)) {
-			current = path_links[current];
+		retval.Insert(0, PosToStr(current));
+		if(path_links.ContainsKey(PosToStr(current))) {
+			current = path_links[PosToStr(current)];
 		}
 		else {
 			Debug.Log("Path was broken?!?!?!?!?");
-			return new List.<int[]>();
+			return new List.<String>();
 		}
 
 		if(current == start_pos) {
@@ -137,60 +164,58 @@ function ReconstructPath(path_links : Dictionary.<int[], int[]>, start_pos : int
 	}
 
 	Debug.Log("Could not reconstruct path?!?!?!?");
-	return new List.<int[]>();
+	return new List.<String>();
 }
 
-function GetPath(start_pos : int[], end_pos : int[], bounds : int[]) : List.<int[]> {
-	var openset = new List.<int[]>();
-	var closedset = new List.<int[]>();
-	var costs = new Dictionary.<int[], int>();
-	var distances = new Dictionary.<int[], int>();
-	var path_links = new Dictionary.<int[], int[]>();
+function GetPath(start_pos : int[], end_pos : int[], bounds : int[]) : List.<String> {
+	var openset = new List.<String>();
+	var closedset = new List.<String>();
+	var costs = new Dictionary.<String, int>();
+	var distances = new Dictionary.<String, int>();
+	var path_links = new Dictionary.<String, int[]>();
 
-	costs[start_pos] = 0;
-	distances[start_pos] = Distance(start_pos, end_pos);
+	costs[PosToStr(start_pos)] = 0;
+	distances[PosToStr(start_pos)] = Distance(start_pos, end_pos);
  
-	openset.Add(start_pos);
+	openset.Add(PosToStr(start_pos));
 
 	while(openset.Count > 0) {
-		var current = openset[0];
-		for(item in openset) { 
-			if(distances[item] < distances[current]) {
-				current = item;
+		var current = StrToPos(openset[0]);
+		Debug.Log("current: " + PosToStr(current));
+		for(var item : String in openset) { 
+			if(distances[item] < distances[PosToStr(current)]) {
+				current = StrToPos(item);
 			}
 		}
 
 		if(current == end_pos) {
-			//for(var key : int[] in path_links.Keys) {
-			//	Debug.Log("KEY: " + PosStr(key) + " :: " + path_links.ContainsKey(key).ToString());
-			//}
 			return ReconstructPath(path_links, start_pos, end_pos);
 		}
 
-		openset.Remove(current);
-		closedset.Add(current);
+		openset.Remove(PosToStr(current));
+		closedset.Add(PosToStr(current));
 
 		for(neighbor in Neighbors(current, bounds)) {
-			if(closedset.Contains(neighbor)) {
+			if(closedset.Contains(PosToStr(neighbor))) {
 				continue;
 			}
 
-			var tentative_cost = costs[current] + Distance(current, neighbor);
+			var tentative_cost = costs[PosToStr(current)] + Distance(current, neighbor);
 
-			if((!openset.Contains(neighbor)) || (tentative_cost < costs[neighbor])) {
-				path_links[neighbor] = current;
-				costs[neighbor] = tentative_cost;
-				distances[neighbor] = costs[neighbor] + Distance(neighbor, end_pos);
+			if((!openset.Contains(PosToStr(neighbor))) || (tentative_cost < costs[PosToStr(neighbor)])) {
+				path_links[PosToStr(neighbor)] = current;
+				costs[PosToStr(neighbor)] = tentative_cost;
+				distances[PosToStr(neighbor)] = costs[PosToStr(neighbor)] + Distance(neighbor, end_pos);
 
-				if(!openset.Contains(neighbor)) {
-					openset.Add(neighbor);
+				if(!openset.Contains(PosToStr(neighbor))) {
+					openset.Add(PosToStr(neighbor));
 				}
 			}
 		}
 
 	}
 
-	return new List.<int[]>();
+	return new List.<String>();
 }
 
 function GetNextMove(start_pos : int[], end_pos : int[], connections : Array, bounds : int[], version : int) : int {
@@ -215,7 +240,7 @@ function GetNextMove(start_pos : int[], end_pos : int[], connections : Array, bo
 	else
 	{
 		// compute path and add to pathcache
-		var path : List.<int[]> = GetPath(start_pos, end_pos, bounds);
+		var path : List.<String> = GetPath(start_pos, end_pos, bounds);
 		pathcache.AddPathTo(end_pos, path);
 		next_pos = pathcache.NextPosInPath(start_pos, end_pos);
 	}
@@ -248,13 +273,6 @@ function GetNextMove(start_pos : int[], end_pos : int[], connections : Array, bo
 // Unity Functions
 //-------------------------------------
 
-function Test(param : Dictionary.<int[], int[]>) {
-	for(var key : int[] in param.Keys) {
-		Debug.Log("KEY: " + PosStr(key));
-		Debug.Log("CONTAINS? " + param.ContainsKey(key).ToString());
-	}
-}
-
 function Start () {
 	var connections = [
 		[[3, 0], [3, 1]],
@@ -272,11 +290,6 @@ function Start () {
 	var bounds = [0, 4, 0, 4];
 	var start = [3, 0];
 	var end = [3, 4];
-
-	var test = new Dictionary.<int[], int[]>();
-	test[start] = end;
-	test[end] = start;
-	Test(test);
 
 	while(true) {
 		var move = GetNextMove(start, end, connections, bounds, 0);
