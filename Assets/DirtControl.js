@@ -1,6 +1,6 @@
 #pragma strict
 
-private var is_on : boolean;
+public var is_on : boolean;
 
 public var health : float;
 
@@ -52,8 +52,11 @@ function turn_on () {
 }
 
 function OnTriggerStay (other : Collider) {
+	// Debug.Log("entered collider");
+	// Debug.Log(other.gameObject.tag);
 	if (other.gameObject.tag == "Dwarf") {
 		other.gameObject.GetComponent(DwarfControl).Move(direction);
+		// Debug.Log("sending to dorf");
 	}
 	if (other.gameObject.tag == "Golem") {
 		other.gameObject.GetComponent(GolemControl).Move(reverse_direction);
