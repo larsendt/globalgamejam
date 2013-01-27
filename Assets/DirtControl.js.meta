@@ -2,7 +2,9 @@ fileFormatVersion: 2
 guid: 9c2b6b27b0317bc499199fec228b7a61
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - golem_material: {fileID: 2100000, guid: 1d28617ead904ee4badc73d46998da37, type: 2}
+  - golem_prefab: {fileID: 100000, guid: a1ef43c412ea7fe4a92368daab9b146d, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

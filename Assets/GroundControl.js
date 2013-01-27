@@ -13,6 +13,7 @@ public var connections;
 
 
 
+
 function Start () {
 	version = 0;
 	connections = new Array();
@@ -23,6 +24,7 @@ function Start () {
 	for (var x = 0; x < width; x++) {
 		blocks[x] = new Array(depth);
 		for (var y = 0; y < depth; y++) {
+			
 			clone = Instantiate(dirt_object, Vector2(x, -y), Quaternion.identity);
 			clone.transform.parent = transform;
 			dirt_control_script = clone.transform.GetComponent(DirtControl);
@@ -35,13 +37,19 @@ function Start () {
 				dirt_control_script.has_golem = false;
 			}
 
+
+
 			dirt_control_script.health = (y + 1);
 			dirt_control_script.x_coordinate = x;
 			dirt_control_script.y_coordinate = y;
 			dirt_control_script.direction = CalcBlockDirection(x, y);
+			dirt_control_script.reverse_direction = CalcReverseBlockDirection(x, y);
 			blocks[x][y] = clone;
-			
 
+			if ((x == Mathf.Floor(width/2)) && (y == depth-2)) {
+				dirt_control_script.has_heart = true;
+				dirt_control_script.health = y * 10;
+			}	
 		}
 	}
 	// Debug.Log(blocks);
@@ -83,6 +91,24 @@ function CalcBlockDirection (x : int, y :int) {
 		return 1;
 	}
 	else if (((y/2) % 2) == 1) {
+		return 2;
+	}
+	else {
+		return 3;
+	}
+}
+
+function CalcReverseBlockDirection (x: int, y : int) {
+	if ((y % 2) == 1) {
+		return 0;
+	}
+	else if ((x == 0) && (((y / 2) % 2) != 1)) {
+		return 0;
+	}
+	else if ((x == width - 1) && (((y / 2) % 2) != 0)) {
+		return 0;
+	}
+	else if (((y / 2) % 2) == 0) {
 		return 2;
 	}
 	else {
