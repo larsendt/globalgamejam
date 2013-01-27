@@ -64,6 +64,8 @@ function DigDown() {
 	else {
 		animation_component.Play("walking");
 	}
+
+
 }
 
 function DigLeft() {
@@ -78,6 +80,8 @@ function DigLeft() {
 	else {
 		animation_component.Play("walking");
 	}
+
+
 }
 
 function DigRight() {
@@ -93,4 +97,8 @@ function DigRight() {
 	else {
 		animation_component.Play("walking");
 	}
+
+
+
 }
+
