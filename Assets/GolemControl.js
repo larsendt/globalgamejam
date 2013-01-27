@@ -41,8 +41,11 @@ function Move (direction : int) {
 	}
 }
 
-function OnCollisionEnter(collision : Collision) {
+function OnCollisionStay(collision : Collision) {
 	if (collision.gameObject.tag == "Dwarf") {
 		Destroy(collision.gameObject);
+	}
+	if (collision.gameObject.tag == "Player") {
+		collision.gameObject.transform.GetComponent(PlayerControl).health -= Time.deltaTime * 2;
 	}
 }
