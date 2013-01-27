@@ -47,5 +47,7 @@ function OnCollisionStay(collision : Collision) {
 	}
 	if (collision.gameObject.tag == "Player") {
 		collision.gameObject.transform.GetComponent(PlayerControl).health -= Time.deltaTime * 2;
+		collision.gameObject.transform.GetComponent(PlayerControl).Play_Ouch();
+		yield WaitForSeconds (1);
 	}
 }

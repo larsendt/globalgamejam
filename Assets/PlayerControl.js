@@ -5,6 +5,8 @@ public var health : float;
 public var starting_health : float;
 private var bad_guy_layermask = (1 << 9);
 private var animation_component : Animation;
+public var ouch_sound : AudioClip;
+public var swing_sound : AudioClip;
 
 function Start () {
 	animation_component = transform.GetChild(0).animation;
@@ -47,6 +49,7 @@ function Update () {
 }
 
 function Strike() {
+	Play_Swing();
 	animation_component.Play("slash");
 	// Debug.Log("striking");
 	var hit : RaycastHit;
@@ -66,4 +69,14 @@ function Strike() {
 	    // Debug.Log(dirt_control_script.health);
 	    // dirt_control_script.health -= Time.deltaTime;
 	}
+}
+
+function Play_Ouch() {
+	audio.clip = ouch_sound;
+	audio.Play();	
+}
+
+function Play_Swing() {
+	audio.clip = swing_sound;
+	audio.Play();
 }
