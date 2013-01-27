@@ -18,6 +18,11 @@ public var y_coordinate : int;
 public var direction : int;
 public var reverse_direction : int;
 
+public var fade_quad : GameObject;
+
+
+
+
 function Start () {
 	is_on = true;
 	if (has_golem) {
@@ -45,6 +50,8 @@ function turn_off () {
 	if (has_heart) {
 		End_Game();
 	}
+
+	PlayerPrefs.SetFloat("Cash", PlayerPrefs.GetFloat("Cash") + y_coordinate);
 }
 
 function turn_on () {
@@ -64,6 +71,5 @@ function OnTriggerStay (other : Collider) {
 }
 
 function End_Game() {
-	Time.timeScale = 0;
-	Debug.Log("You win!");
+	Application.LoadLevel(2);
 }

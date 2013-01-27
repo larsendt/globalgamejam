@@ -16,7 +16,7 @@ function Update () {
 	var dwarf_root_control_script : DwarfRootControl = dwarf_root.transform.GetComponent(DwarfRootControl);
 
 	if (	(time_since_spawn > time_between_spawns) && 
-			(GameObject.FindGameObjectsWithTag("Dwarf").length < dwarf_root_control_script.max_dwarves)
+			(GameObject.FindGameObjectsWithTag("Dwarf").length < PlayerPrefs.GetInt("Miners"))
 			) {
 		var dwarf = Instantiate(dwarf_prefab, transform.position, Quaternion.identity);
 		time_since_spawn = 0;

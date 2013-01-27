@@ -5,7 +5,7 @@ public var width : int;
 public var player : GameObject;
 
 function Start () {
-	camera.orthographicSize = width / 2;
+	camera.orthographicSize = (width / 3) - 1;
 }
 
 function Update () {
