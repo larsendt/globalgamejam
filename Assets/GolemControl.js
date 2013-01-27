@@ -32,10 +32,14 @@ function Move (direction : int) {
 	else if (direction == 2) { // left
 		rigidbody.AddForce(-Vector3.right * dwarf_move_force * Time.deltaTime);
 		animation_component.CrossFade("walking");
+				transform.localScale.x = -1;
+
 	}
 	else if (direction == 3) { // right
 		rigidbody.AddForce(Vector3.right * dwarf_move_force * Time.deltaTime);
 		animation_component.CrossFade("walking");
+				transform.localScale.x = 1;
+
 	}
 	else if (direction == -1) {
 	}

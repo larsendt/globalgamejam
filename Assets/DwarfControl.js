@@ -6,6 +6,7 @@
 // var DOWN = 2;
 // var RIGHT = 3;
 
+static var num_sounds : float;
 
 public var dwarf_move_force : float;
 
