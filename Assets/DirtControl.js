@@ -7,7 +7,7 @@ public var health : float;
 public var has_golem : boolean;
 public var has_heart : boolean;
 
-public var heart_material : Material;
+public var heart_prefab : GameObject;
 
 public var golem_material : Material;
 public var golem_prefab : GameObject;
@@ -24,7 +24,7 @@ function Start () {
 		renderer.material = golem_material; 
 	}
 	if (has_heart) {
-		renderer.material = heart_material;
+		var heart = Instantiate(heart_prefab, transform.position, Quaternion.identity);
 	}
 }
 
