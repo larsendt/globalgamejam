@@ -1,15 +1,28 @@
 #pragma strict
 
 public var dwarf_move_force : float;
+public var health : float;
+public var starting_health : float;
 private var bad_guy_layermask = (1 << 9);
 private var animation_component : Animation;
 
 function Start () {
 	animation_component = transform.GetChild(0).animation;
+	health = starting_health;
 	// Debug.Log(animation_component);
 }
 
 function Update () {
+	Debug.Log(health);
+	if (health < starting_health) {
+		health += Time.deltaTime * .5;
+	}
+	if (health > starting_health) {
+		health = starting_health;
+	}
+	if (health <= 0) {
+		Destroy(gameObject);
+	}
 	var horizontal_input = Input.GetAxis("Horizontal");
 	var vertical_input = Input.GetAxis("Vertical");
 	rigidbody.AddForce(Vector2(horizontal_input * dwarf_move_force * Time.deltaTime, vertical_input * dwarf_move_force * Time.deltaTime));
