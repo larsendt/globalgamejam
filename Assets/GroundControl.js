@@ -58,15 +58,26 @@ function Start () {
 	for (var i = -1; i < width + 1; i++) {
 			clone = Instantiate(indestructible_block_object, Vector2(i, 1), Quaternion.identity);	
 			clone.transform.parent = transform;	
+			Destroy(clone.renderer);
 			clone = Instantiate(indestructible_block_object, Vector2(i, -(depth)), Quaternion.identity);	
 			clone.transform.parent = transform;	
 		}
 
 	for (var j = -1; j < depth + 1; j++) {
-			clone = Instantiate(indestructible_block_object, Vector2(-1, -j), Quaternion.identity);	
-			clone.transform.parent = transform;	
-			clone = Instantiate(indestructible_block_object, Vector2(width, -j), Quaternion.identity);	
-			clone.transform.parent = transform;	
+		// for (var l = -100; l < 100 + width; l++) {
+			// if ((l<=-1) || (l>=width)) {
+		clone = Instantiate(indestructible_block_object, Vector2(-1, -j), Quaternion.identity);	
+		clone.transform.parent = transform;
+		if ((j == -1) || (j == 0)) {
+			Destroy(clone.renderer);
+		}
+		clone = Instantiate(indestructible_block_object, Vector2(width, -j), Quaternion.identity);	
+		clone.transform.parent = transform;	
+		if ((j == -1) || (j == 0)) {
+			Destroy(clone.renderer);
+		}
+			// }
+		// }
 	}
 
 	Instantiate(dwarf_spawn_object, Vector2(0, 0), Quaternion.identity);

@@ -26,7 +26,7 @@ public var fade_quad : GameObject;
 function Start () {
 	is_on = true;
 	if (has_golem) {
-		renderer.material = golem_material; 
+		// renderer.material = golem_material; 
 	}
 	if (has_heart) {
 		var heart = Instantiate(heart_prefab, transform.position, Quaternion.identity);

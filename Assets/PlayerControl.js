@@ -15,7 +15,7 @@ function Start () {
 }
 
 function Update () {
-	Debug.Log(health);
+	// Debug.Log(health);
 	if (health < starting_health) {
 		health += Time.deltaTime * .5;
 	}

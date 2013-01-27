@@ -9,7 +9,7 @@ function Start () {
 
 function Update () {
 	var num_players = GameObject.FindGameObjectsWithTag ("Player").length;
-	Debug.Log(num_players);
+	// Debug.Log(num_players);
 	if ((num_players == 0) && (Input.GetButtonDown("Jump"))) {
 		Debug.Log("spawn player");
 		var clone = Instantiate(player_prefab, transform.position, Quaternion.identity);
