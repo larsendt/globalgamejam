@@ -29,10 +29,12 @@ class PathCache {
 	// key is destination [x, y]
 	public var paths : Dictionary.<String, List.<String> >;
 
-	public var is_valid : boolean = false;
+	public var is_valid : boolean;
+	public var status : int;
 
-	public function PathCache() {
+	public function PathCache(derp : int) {
 		this.is_valid = false;
+		this.status = 42;
 	}
 
 	public function PathCache(bounds : int[], connections, version : int) {
@@ -41,6 +43,7 @@ class PathCache {
 		this.level_version = version;
 		this.paths = new Dictionary.<String, List.<String> >();
 		this.is_valid = true;
+		this.status = 1337;
 	}
 
 	public function HasPathTo(destination : int[]) : boolean {
@@ -103,7 +106,7 @@ class PathCache {
 // Globals
 //------------------------------------
 
-var pathcache = new PathCache();
+var pathcache = new PathCache(1);
 var NOPATH = -1;
 var UP = 0;
 var LEFT = 1;
@@ -206,8 +209,8 @@ function GetPath(start_pos : int[], end_pos : int[], bounds : int[], connections
 
 function GetNextMove(start_pos : int[], end_pos : int[], connections, bounds : int[], version : int) : int {
 	// pathcache is global (see top of file)
+	pathcache = new PathCache(bounds, connections, version);
 	if(!pathcache.is_valid) {
-		Debug.Log("New pathcache");
 		pathcache = new PathCache(bounds, connections, version);
 	}
 	else if(pathcache.level_version < version) {
@@ -263,14 +266,14 @@ function GetNextMove(start_pos : int[], end_pos : int[], connections, bounds : i
 // Unity Functions
 //-------------------------------------
 
-var bounds;
+/*var bounds;
 var start;
 var end;
 var connections;
-var done = false;
+var done = false;*/
 
 function Start () {
-	connections = [
+	/*connections = [
 		[[3, 0], [3, 1]],
 		[[3, 1], [2, 1]],
 		[[2, 1], [1, 1]],
@@ -285,7 +288,7 @@ function Start () {
 
 	bounds = [0, 10, -2, 50];
 	start = [3, 0];
-	end = [3, 4];
+	end = [3, 4];*/
 }
 
 function Update () {
