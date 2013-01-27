@@ -1,4 +1,4 @@
-#pragma strict
+// #pragma strict
 
 // var NOPATH = -1;
 // var UP = 0;
@@ -14,33 +14,31 @@ private var dirt_layermask = 1<<10;
 private var time_since_changemove : float;
 private var current_move : int;
 
-public var pathfinding : GameObject;
-private var pathfinding_script : AStar;
-
 public var ground_object : GameObject;
 private var ground_control_script : GroundControl;
 
 function Start () {
-	current_move = 2;
-	pathfinding_script = pathfinding.transform.GetComponent(AStar);
+	current_move = -1;
 	ground_control_script = ground_object.transform.GetComponent(GroundControl);
 
 }
 
 function Update () {
-	if (time_since_changemove > 1) {
-		current_move = Mathf.Floor(Random.Range(1, 4));
-		var current_pos = [Mathf.RoundToInt(transform.position.x), Mathf.RoundToInt(transform.position.y)];
-		var destination = [5, 0];
-		Debug.Log(destination);
-		for (i in destination) {
-			Debug.Log(i);
-		}
-		var conn = ground_control_script.connections;
-		var bounds = [0, 10, 0, 50];
-		var vers = ground_control_script.version;
-		var current_move = pathfinding_script.GetNextMove(current_pos, destination, conn, bounds, vers);
-		Debug.Log(current_move);
+	if (time_since_changemove > 0.5) {
+		//current_move = Mathf.Floor(Random.Range(1, 4));
+
+		var xpos = Mathf.RoundToInt(transform.position.x);
+		var ypos = -Mathf.RoundToInt(transform.position.y);
+
+		// Debug.Log(xpos);
+		// Debug.Log(ypos);
+
+		// Debug.Log(ground_control_script);
+		// current_move = ground_control_script.ReturnDirection(xpos, ypos);
+
+		// Debug.Log(current_move);
+
+
 		time_since_changemove = 0;
 	}
 	else {
@@ -56,20 +54,23 @@ function Move (direction : int) {
 		rigidbody.AddForce(Vector3.up * dwarf_move_force * Time.deltaTime);
 		//do animation
 	}
-	else if (direction == 1) { // left
+	else if (direction == 1) { // down
 		// Debug.Log("left");
-		rigidbody.AddForce(-Vector3.right * dwarf_move_force * Time.deltaTime);
-		DigLeft();
-	}
-	else if (direction == 2) { // down
-		// Debug.Log("down");
 		rigidbody.AddForce(-Vector3.up * dwarf_move_force * Time.deltaTime);
 		DigDown();
+	}
+	else if (direction == 2) { // left
+		// Debug.Log("down");
+		rigidbody.AddForce(-Vector3.right * dwarf_move_force * Time.deltaTime);
+		DigLeft();
 	}
 	else if (direction == 3) { // right
 		// Debug.Log("right");
 		rigidbody.AddForce(Vector3.right * dwarf_move_force * Time.deltaTime);
 		DigRight();
+	}
+	else if (direction == -1) {
+		// Debug.Log("what");
 	}
 	// else if (direction == -1) {
 	// 	Move(Mathf.Floor(Random.Range(0, 4)));

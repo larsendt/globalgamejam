@@ -8,8 +8,10 @@ public var indestructible_block_object : GameObject;
 public var dwarf_spawn_object : GameObject;
 
 public var version : int;
-public var blocks;
+public var blocks : Array;
 public var connections;
+
+
 
 function Start () {
 	version = 0;
@@ -36,11 +38,13 @@ function Start () {
 			dirt_control_script.health = (y + 1);
 			dirt_control_script.x_coordinate = x;
 			dirt_control_script.y_coordinate = y;
+			dirt_control_script.direction = CalcBlockDirection(x, y);
 			blocks[x][y] = clone;
+			
 
 		}
 	}
-
+	// Debug.Log(blocks);
 
 
 	for (var i = -1; i < width + 1; i++) {
@@ -67,35 +71,82 @@ function Start () {
 }
 
 
-
-	// for (x = 0; x < width; x++) {
-	//  	var script = blocks[x][0].transform.GetComponent(DirtControl);
-	//  	script.turn_off();
-	// }
-	// Debug.Log(blocks);
-
 function Update () {
 
 }
 
-function UpdateConnections (x_coord : int, y_coord : int) {
-	version++;
-
-
-	if ((x_coord != width) && (blocks[x_coord+1][y_coord].GetComponent(DirtControl).is_on == false)) {
-		connections.push([[x_coord,y_coord], [x_coord+1,y_coord]]);
+function CalcBlockDirection (x : int, y :int) {
+	if ((x == 0) && (((y/2) % 2) != 0)) {
+		return 1;
 	}
-	if ((y_coord != depth) && (blocks[x_coord][y_coord+1].GetComponent(DirtControl).is_on == false)) {
-		connections.push([[x_coord,y_coord], [x_coord,y_coord+1]]);
+	else if ((x == width - 1) && (((y/2) % 2) != 1)) {
+		return 1;
 	}
-	if ((x_coord != 0) && (blocks[x_coord-1][y_coord].GetComponent(DirtControl).is_on == false)) {
-		connections.push([[x_coord,y_coord], [x_coord-1,y_coord]]);
+	else if (((y/2) % 2) == 1) {
+		return 2;
 	}
-	if ((y_coord != 0) && (blocks[x_coord][y_coord-1].GetComponent(DirtControl).is_on == false)) {
-		connections.push([[x_coord,y_coord], [x_coord,y_coord-1]]);
+	else {
+		return 3;
 	}
-	for (element in connections) {
-		Debug.Log("[ [ " + element[0][0] + " , " + element[0][1] + " ] , [ " + element[1][0] + " , " + element[1][1] + "] ]");
-	}
-
 }
+
+
+function ReturnDirection(x :int, y:int){
+	return blocks[x][y].direction;
+}
+
+// function UpdateConnections (x_coord : int, y_coord : int) {
+// 	version++;
+
+
+// 	if ((x_coord != width) && (blocks[x_coord+1][y_coord].GetComponent(DirtControl).is_on == false)) {
+// 		connections.push([[x_coord,y_coord], [x_coord+1,y_coord]]);
+// 	}
+// 	if ((y_coord != depth) && (blocks[x_coord][y_coord+1].GetComponent(DirtControl).is_on == false)) {
+// 		connections.push([[x_coord,y_coord], [x_coord,y_coord+1]]);
+// 	}
+// 	if ((x_coord != 0) && (blocks[x_coord-1][y_coord].GetComponent(DirtControl).is_on == false)) {
+// 		connections.push([[x_coord,y_coord], [x_coord-1,y_coord]]);
+// 	}
+// 	if ((y_coord != 0) && (blocks[x_coord][y_coord-1].GetComponent(DirtControl).is_on == false)) {
+// 		connections.push([[x_coord,y_coord], [x_coord,y_coord-1]]);
+// 	}
+// 	for (element in connections) {
+// 		Debug.Log("[ [ " + element[0][0] + " , " + element[0][1] + " ] , [ " + element[1][0] + " , " + element[1][1] + "] ]");
+// 	}
+
+// }
+
+// function isRowClear (row : int) {
+
+// }
+
+// function isBlockOn (x : int, y : int) {
+
+// }
+
+// function GetNextBlock () {
+// 	for (y = 0; y < depth; y++) {
+// 		if (isRowClear(y)) {
+// 			continue;
+// 		}
+// 		var index : int = y % 2;
+// 		var dir = (index * 2) + 1;
+// 		if (dir == -1) {
+// 			for (var i = width; i >= 0; i--) {
+// 				if (!isBlockOn(i, y)) {
+// 					continue;
+// 				}
+// 				return [i, y];
+// 			}
+// 		}
+// 		else {
+// 			for (var i = 0; i < width; i++) {
+// 				if (!isBlockOn(i, y)) {
+// 					continue;
+// 				}
+// 				return [i, y];
+// 			}
+// 		}
+// 	}
+// }

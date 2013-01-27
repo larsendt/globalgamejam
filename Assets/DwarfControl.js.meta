@@ -2,7 +2,9 @@ fileFormatVersion: 2
 guid: 4d3fb35d702d3864b878f782cd0448e2
 MonoImporter:
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - pathfinding: {instanceID: 0}
+  - ground_object: {fileID: 100000, guid: 4bc50ca4e76924c489530dc747e743b5, type: 2}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 
